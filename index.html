@@ -7,26 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-    <div class="center">
-        <h1 class='updatedAt' id='updated-at'></h1>
-        <h4 class='updatedAt viewvv' id='peopleViewing'></h4>
-    </div>
-    <br />
     <div id="Info" class="cards">
-        <script src="./scripts/script.js" defer></script>
+        <div class="center">
+            <script src="./scripts/script.js" defer></script>
+        </div>
     </div>
 </body>
 <script src="/socket.io/socket.io.js"></script>
-<script src="./scripts/updater.js"></script>
-<script>
-
-    var socket = io();
-    var body = document.getElementById("Info")
-    var button = document.getElementById("butt1")
-
-    socket.on("test", function (data) {
-        body.innerHTML = `${data.data}<br>
- ${data.message} `;
-    })
-
-</script>

@@ -6,7 +6,7 @@ body {
     margin: 2px auto;
     width: 200px;
     height: 100px;
-    background-color: rgb(70, 70, 90);
+    background-color: rgba(70, 70, 90, 0.5);
     border-radius: 400px 400px 0 0;
     position: relative;
     overflow: hidden;
@@ -16,7 +16,7 @@ body {
     margin: 2px auto;
     width: 200px;
     height: 100px;
-    background-color: rgb(70, 70, 90);
+    background-color: rgba(70, 70, 90, 0.5);
     border-radius: 0 0 400px 400px;
     position: relative;
     overflow: hidden;
@@ -52,15 +52,6 @@ body {
     transform-origin: bottom center;
     transform: translate(50%, 0) rotate(0deg);
     transition: transform 0.3s;
-}
-
-input[type="range"] {
-    -webkit-appearance: none;
-    color: rgb(70, 70, 90);
-    background-color: rgb(40, 40, 60);
-    display: block;
-    width: 80%;
-    margin: 20px auto;
 }
 
 #dial-value,
@@ -110,7 +101,7 @@ h3 {
 .cards {
     display: flex;
     flex-wrap: wrap;
-    justify-content: flex-start;
+    justify-content: center;
 }
 
 .card {
@@ -134,4 +125,20 @@ h3 {
 .title {
     color: white;
     font-size: 38px;
+}
+
+.mi__in {
+    color: white;
+}
+
+.glow-g {
+    text-shadow: 0 0 10px rgb(100, 255, 100);
+}
+
+.glow-r {
+    text-shadow: 0 0 10px rgb(255, 100, 100);
+}
+
+.divider {
+    border-bottom: 1px solid rgb(150, 150, 180);
 }
