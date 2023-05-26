@@ -54,7 +54,7 @@ client.manager = new Manager({
     if (guild) guild.shard.send(payload);
   }
 })
-client.login("MTA3MDczNTY3OTg4MzA2MzQzNw.G0vPda.t5lx-KUcqcyLwdQiYX59WITNtxdlWoBLq4_ZxQ")
+client.login("")
 
 client.on("ready",(client)=>{
   console.log(client.user.tag+" ready")
