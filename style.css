@@ -100,13 +100,15 @@ h3 {
 
 .cards {
     display: flex;
+    flex-direction: row;
+    margin-block: auto;
     flex-wrap: wrap;
     justify-content: center;
     gap: 2rem;
 }
 
 .card {
-    width: 20%;
+    min-width: 10%;
     text-align: center;
     border: 2px solid rgb(110, 110, 160);
 }

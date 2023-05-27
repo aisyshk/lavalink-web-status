@@ -1,5 +1,6 @@
 const token = '';
 const port = 2334;
+const updateRatio = 5000; // 5 seconds
 
 const express = require('express');
 const app = express();
@@ -29,8 +30,8 @@ io.on('connection', (socket) => {
     watching += 1;
 
     io.emit('test', {
-        data: `<div class="center"><h1 class="updatedAt">Updates Every: <span class="password">30 s</span><br/>Connected To: <span class="password">${client.user ? client.user.tag : ' '}</span><br/><span class="password">${watching}</span> site watchers</h1><h4 class="updatedAt viewvv"> Last Updated At: <span class="password">${moment(Date.now())}</span></h4></div>`,
-        message: startStat ? startStat : 'Fetching stats please refresh or return shortly'
+        data: `<div class="center"><h1 class="updatedAt">Updates Every: <span class="password">5 s</span><br/>Connected To: <span class="password">${client.user ? client.user.tag : ' '}</span><br/><span class="password">${watching}</span> site watchers</h1><h4 class="updatedAt viewvv"> Last Updated At: <span class="password">${moment(Date.now())}</span></h4></div>`,
+        message: startStat || 'Fetching stats please refresh or return shortly'
     });
     socket.on('disconnect', () => {
         console.log('User Disconnected ' + socket.id);
@@ -56,23 +57,29 @@ client.login(token);
 client.on('ready', (client) => {
     console.log(client.user.tag + ' ready');
     client.manager.init(client.user.id);
+
+    setTimeout(() => {
+        startStat = getStat(client)?.map(data => data.bun).join('\n');
+    }, 2000);
+
     setInterval(() => {
-        let data = getStat(client);
-        let bun = data.all;
+        const data = getStat(client);
+        const bun = data.map(e => e.bun);
         startStat = bun?.join('\n');
         io.emit('test', {
-            data: `<div class="center"><h1 class="updatedAt">Updates Every: <span class="password">30 s</span><br/>Connected To: <b class="password">${client.user ? client.user.tag : ' '}</b><br/><span class="password">${watching}</span> site watchers</h1><br><h4 class="updatedAt viewvv"> Last Updated At: <span class="password">${moment(Date.now())}</span></h4></div>`,
+            data: `<div class="center"><h1 class="updatedAt">Updates Every: <span class="password">5 s</span><br/>Connected To: <b class="password">${client.user ? client.user.tag : ' '}</b><br/><span class="password">${watching}</span> site watchers</h1><br><h4 class="updatedAt viewvv"> Last Updated At: <span class="password">${moment(Date.now())}</span></h4></div>`,
             ///  message: `${names[Math.floor(Math.random()*names.length)]} : [${says[Math.floor(Math.random()*says.length)]}]`
             message: `${startStat}`
         });
 
-        io.emit('updateValues', {
-            cpu: data.cpu,
-            mem: data.mem,
-            cardIndex: data.cardIndex
+        data.forEach(e => {
+            io.emit('updateValues', {
+                cpu: e.cpu,
+                mem: e.mem,
+                cardIndex: e.cardIndex
+            });
         });
-
-    }, 2000);
+    }, updateRatio);
 });
 client.on('debug', msg => {
     if (msg.includes('Hit a 429')) return process.kill(1);
@@ -88,16 +95,13 @@ client.on('raw', d => client.manager.updateVoiceState(d));
 function getStat(client) {
     const all = [];
     let cardIndex = 0;
-    let cpu;
-    let mem;
 
-    client.manager.nodes.forEach((node, index) => {
-        cpu = (node.stats.cpu.lavalinkLoad * 100).toFixed(2);
-        mem = ((node.stats.memory.used / node.stats.memory.reservable) * 100).toFixed(2);
-        console.log(`potatoes again? -> ${index}`);
-        cardIndex = index;
-
-        all.push(`
+    client.manager.nodes.forEach(node => {
+        const data = {
+            cpu: (node.stats.cpu.lavalinkLoad * 100).toFixed(2),
+            mem: ((node.stats.memory.used / node.stats.memory.reservable) * 100).toFixed(2),
+            cardIndex,
+            bun: `
           <div class="card">
             <div style="display: inline-block; margin: 20px auto;">
               <div class="center">
@@ -109,16 +113,16 @@ function getStat(client) {
               <div class="divider"></div>
               <div class="center">
                 <h1>CPU USAGE</h1>
-                <h2 id="dial-value-${index}" class="dial-value"></h2>
+                <h2 id="dial-value-${cardIndex}" class="dial-value"></h2>
               </div>
               <div class="dial">
-                <div id="hand-pointer-${index}" class="hand"></div>
+                <div id="hand-pointer-${cardIndex}" class="hand"></div>
               </div>
               <div class="dial-inverted">
-                <div id="hand-pointer-inv-${index}" class="hand-inverted"></div>
+                <div id="hand-pointer-inv-${cardIndex}" class="hand-inverted"></div>
               </div>
               <div class="center">
-                <h2 id="dial-value-inverted-${index}" class="dial-value-inverted"></h2>
+                <h2 id="dial-value-inverted-${cardIndex}" class="dial-value-inverted"></h2>
                 <h1>MEMORY USAGE</h1>
               </div>
               <div class="divider"></div>
@@ -160,8 +164,13 @@ function getStat(client) {
             </div>
           </div>
           <br>
-        `);
+        `
+        };
+
+        all.push(data);
+
+        cardIndex++;
     });
 
-    return { all, cpu, mem, cardIndex };
-};
+    return all;
+}

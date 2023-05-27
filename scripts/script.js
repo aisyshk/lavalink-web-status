@@ -9,7 +9,6 @@ socket.on('test',
 
 socket.on('updateValues',
     function (data) {
-        console.log(`\n\nDATA:\ncpu ${data.cpu}\ncard: ${data.cardIndex}\nmem: ${data.mem}\ncard: ${data.cardIndex}`);
         setDialHandPosition(data.cpu, data.cardIndex);
         setDialHandInvertedPosition(data.mem, data.cardIndex);
     });
