@@ -18,6 +18,7 @@
     "moment": "^2.29.4",
     "moment-duration-format": "^2.3.2",
     "pretty-bytes": "^5.6.0",
+    "semistandard": "^16.0.1",
     "socket.io": "^4.5.2"
   },
   "devDependencies": {

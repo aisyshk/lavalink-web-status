@@ -143,3 +143,7 @@ h3 {
 .divider {
     border-bottom: 1px solid rgb(150, 150, 180);
 }
+
+body {
+    color: white;
+}
