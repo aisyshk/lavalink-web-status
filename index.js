@@ -7,11 +7,8 @@ var http = require("http")
 const server = http.createServer(app)
 var socket = require("socket.io")
 const io = socket(server)
-
-let cpu;
-let mem;
-
 console.log(socket.Socket)
+
 const bodyParser = require("body-parser")
 const moment = require("moment");
 require("moment-duration-format");
@@ -32,16 +29,12 @@ io.on("connection", (socket) => {
     watching += 1;
 
     io.emit("test", {
-        data: `<div class="center"><h1 class="updatedAt">Updates Every: 30 s<br/>Connected To: ${client.user? client.user.tag:" "}<br/>${watching} site watchers</h1><h4 class="updatedAt viewvv"> Last Updated At: ${moment(Date.now())}</h4></div>`,
+        data: `<div class="center"><h1 class="updatedAt">Updates Every: <span class="password">30 s</span><br/>Connected To: <span class="password">${client.user ? client.user.tag : " "}</span><br/><span class="password">${watching}</span> site watchers</h1><h4 class="updatedAt viewvv"> Last Updated At: <span class="password">${moment(Date.now())}</span></h4></div>`,
         message: startStat ? startStat : "Fetching stats please refresh or return shortly"
     })
     socket.on("disconnect", () => {
         console.log("User Disconnected " + socket.id)
         watching -= 1;
-    })
-    io.emit("updateValues", {
-        cpu: cpu,
-        mem: mem
     })
 })
 
@@ -73,21 +66,17 @@ client.on("ready", (client) => {
 
     }, 2000)
     setInterval(() => {
+        getStat(client);
         let bun = getStat(client);
         startStat = bun?.join("\n");
         io.emit("test", {
-            data: `<div class="center"><h1 class="updatedAt">Updates Every: <span class="password">30 s</span><br/>Connected To: <b class="password">${client.user? client.user.tag:" "}</b><br/><span class="password">${watching}</span> site watchers</h1><br><h4 class="updatedAt viewvv"> Last Updated At: <span class="password">${moment(Date.now())}</span></h4></div>`,
+            data: `<div class="center"><h1 class="updatedAt">Updates Every: <span class="password">30 s</span><br/>Connected To: <b class="password">${client.user ? client.user.tag : " "}</b><br/><span class="password">${watching}</span> site watchers</h1><br><h4 class="updatedAt viewvv"> Last Updated At: <span class="password">${moment(Date.now())}</span></h4></div>`,
             ///  message: `${names[Math.floor(Math.random()*names.length)]} : [${says[Math.floor(Math.random()*says.length)]}]`
             message: `
 ${bun.join(" \n")}
    `
-        })
-        
-    io.emit("updateValues", {
-        cpu: cpu,
-        mem: mem
-    })
-    }, 30000)
+        });
+    }, 5000)
 
 })
 client.on("debug", msg => {
@@ -104,8 +93,13 @@ client.on("raw", d => client.manager.updateVoiceState(d));
 //const cardsContainer = document.getElementsByClassName('cards');
 
 function getStat(client) {
-    let all = []
+    let all = [];
+    let cardIndex = 0;
     client.manager.nodes.forEach(node => {
+        let cpu = (node.stats.cpu.lavalinkLoad * 100).toFixed(2);
+        let mem = ((node.stats.memory.used / node.stats.memory.reservable) * 100).toFixed(2);
+        cardIndex++;
+
         all.push(`
       <div class="card">
         <div style="display: inline-block; margin: 20px auto;">
@@ -118,16 +112,16 @@ function getStat(client) {
           <div class="divider"></div>
           <div class="center">
             <h1>CPU USAGE</h1>
-            <h2 id="dial-value">%</h2>
+            <h2 id="dial-value-${cardIndex}" class="dial-value">%</h2>
           </div>
           <div class="dial">
-            <div id="hand" class="hand"></div>
+            <div id="hand-pointer-${cardIndex}" class="hand"></div>
           </div>
           <div class="dial-inverted">
-            <div id="hand-inv" class="hand-inverted"></div>
+            <div id="hand-pointer-inv-${cardIndex}" class="hand-inverted"></div>
           </div>
           <div class="center">
-            <h2 id="dial-value-inverted">%</h2>
+            <h2 id="dial-value-inverted-${cardIndex}" class="dial-value-inverted">%</h2>
             <h1>MEMORY USAGE</h1>
           </div>
           <div class="divider"></div>
@@ -170,9 +164,13 @@ function getStat(client) {
       </div>
       <br>
     `);
-        cpu = Math.round(node.stats.cpu.systemLoad / 100).toFixed(2);
-        mem = ((node.stats.memory.used / node.stats.memory.reservable) * 100).toFixed(2);
-    })
+
+        io.emit("updateValues", {
+            cpu: cpu,
+            mem: mem,
+            cardIndex: cardIndex
+        });
+    });
 
     return all;
 }
