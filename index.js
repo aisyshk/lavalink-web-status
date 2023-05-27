@@ -1,6 +1,6 @@
 const token = '';
 const port = 2334;
-const updateRatio = 5000; // 5 seconds
+const updateRatio = 5000;
 
 const express = require('express');
 const app = express();
