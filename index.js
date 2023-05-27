@@ -99,6 +99,7 @@ function getStat (client) {
     const data = {
       cpu: (node.stats.cpu.lavalinkLoad * 100).toFixed(2),
       mem: ((node.stats.memory.used / node.stats.memory.reservable) * 100).toFixed(2),
+      cardIndex,
       bun: `
           <div class="card">
             <div style="display: inline-block; margin: 20px auto;">
